@@ -1,9 +1,14 @@
 'use client';
+
 import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useDashboardData } from '@/hooks/useDashboardData';
 import { Header } from './Header';
-import LeafletMap from './MapView';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
-import { SiteTable } from './SiteTable';
+import MapView from './MapView';
+import { SitesTable } from './SitesTable';
+import { SiteDetailView } from './SiteDetailView';
+
+import dynamic from 'next/dynamic';
 
 // Mock time series data
 const mockTimeSeriesData = [
@@ -17,9 +22,13 @@ const mockTimeSeriesData = [
   { time: '14:00', manholeMetrics: 1.8, referenceLevel: 2.1, rainfall: 0 },
   { time: '16:00', manholeMetrics: 0.2, referenceLevel: 0.5, rainfall: 0 },
 ];
-
-export default function Dashboard() {
+// Dynamically import LeafletMap with SSR disabled (avoids ReferenceError: window is not defined)
+const MapView = dynamic(() => import('@/components/MapView'), {
+  ssr: false,
+});
+export default function EBMUDDashboard() {
   const [selectedSite, setSelectedSite] = useState(null);
+  const { sites, summaryStats } = useDashboardData();
 
   const handleSiteSelect = (site) => {
     setSelectedSite(site);
@@ -28,31 +37,32 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Header />
+
       <div className="flex flex-1 overflow-hidden">
+        {/* Main Content - Left Side */}
         <div
           className={`flex-1 transition-all duration-300 ${
-            selectedSite ? 'lg:w-1/2' : 'w-full'
+            selectedSite ? 'w-1/2' : 'w-full'
           } overflow-auto`}
         >
-          <div className="p-3 sm:p-6 space-y-6">
-            <LeafletMap />
+          <div className="p-6">
+            <MapView
+            // sites={sites}
+            // summaryStats={summaryStats}
+            // onSiteSelect={handleSiteSelect}
+            />
+
             <Card>
               <CardHeader>
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <CardTitle className="text-lg sm:text-xl">
-                    Manhole Sites
-                  </CardTitle>
-                  <div>SearchAndFilter</div>
-                </div>
+                <CardTitle className="text-xl">Manhole Sites</CardTitle>
               </CardHeader>
-              <CardContent className="p-0 sm:p-6">
-                {/* Mobile Card View */}
-                <div className="sm:hidden space-y-4 p-4">
-                  <div>Site Card (mobile)</div>
-                </div>
-
+              <CardContent className="p-6">
                 {/* Desktop Table View */}
-                <SiteTable site={"MH01"} onSiteSelect={handleSiteSelect} />
+                <SitesTable
+                  sites={sites}
+                  onSiteSelect={handleSiteSelect}
+                  selectedSiteId={selectedSite?.siteId}
+                />
               </CardContent>
             </Card>
           </div>
@@ -60,20 +70,15 @@ export default function Dashboard() {
 
         {/* Detail Panel - Right Side */}
         {selectedSite && (
-          <div className="hidden lg:block w-1/2 border-l border-gray-200 bg-white overflow-auto">
-            Side Detail View
+          <div className="w-1/2 border-l border-gray-200 bg-white overflow-auto">
+            <SiteDetailView
+              site={selectedSite}
+              timeSeriesData={mockTimeSeriesData}
+              onClose={() => setSelectedSite(null)}
+            />
           </div>
         )}
       </div>
-
-      {/* Mobile Detail Modal */}
-      {selectedSite && (
-        <div className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end">
-          <div className="bg-white w-full h-3/4 rounded-t-lg overflow-auto">
-            <div>Side Detail View Mobile</div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
