@@ -1,16 +1,20 @@
 'use client';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import "leaflet/dist/leaflet.css";
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 
-export default function LeafletMap() {
-  // Oakland, CA coordinates
-  const position: [number, number] = [37.8044, -122.2711];
+// Fix for default markers in react-leaflet
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+
+export default function MapView() {
+  const position = [37.8869, -122.2982];
 
   return (
     <MapContainer
       center={position}
       zoom={13}
-      style={{ height: '400px', width: '100%', borderRadius: '12px' }}
+      className="h-96 w-full rounded-xl"
+      scrollWheelZoom={false}
     >
       <TileLayer
         attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'

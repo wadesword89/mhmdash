@@ -8,8 +8,9 @@ export const Header = () => {
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    // Simulate API call delay
+    // Simulate API call delay - update when you have actual API logic***
     await new Promise((resolve) => setTimeout(resolve, 1000));
+
     setLastUpdated(new Date());
     setIsRefreshing(false);
   };
