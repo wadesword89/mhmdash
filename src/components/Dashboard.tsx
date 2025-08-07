@@ -4,13 +4,12 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { Header } from './Header';
-import MapView from './MapView';
 import { SitesTable } from './SitesTable';
 import { SiteDetailView } from './SiteDetailView';
-
+import MapView from './MapView';
 import dynamic from 'next/dynamic';
 
-// Mock time series data
+
 const mockTimeSeriesData = [
   { time: '00:00', manholeMetrics: 2.1, referenceLevel: 2.0, rainfall: 0 },
   { time: '02:00', manholeMetrics: 3.2, referenceLevel: 3.1, rainfall: 0.2 },
@@ -22,10 +21,12 @@ const mockTimeSeriesData = [
   { time: '14:00', manholeMetrics: 1.8, referenceLevel: 2.1, rainfall: 0 },
   { time: '16:00', manholeMetrics: 0.2, referenceLevel: 0.5, rainfall: 0 },
 ];
-// Dynamically import LeafletMap with SSR disabled (avoids ReferenceError: window is not defined)
+
+// Dynamically import Leaflet Map with SSR disabled (avoids ReferenceError: window is not defined)
 const MapView = dynamic(() => import('@/components/MapView'), {
   ssr: false,
 });
+
 export default function EBMUDDashboard() {
   const [selectedSite, setSelectedSite] = useState(null);
   const { sites, summaryStats } = useDashboardData();
