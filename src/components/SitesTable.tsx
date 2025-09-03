@@ -8,28 +8,26 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
+import { sites } from '@/lib/sites';
 
-export const SitesTable = ({ sites, onSiteSelect, selectedSiteId }) => {
+export const SitesTable = ({ onSiteSelect, selectedSiteId }) => {
   return (
     <div className="overflow-x-auto">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Site ID</TableHead>
-            <TableHead>Site Name</TableHead>
-            <TableHead>MM Level (in)</TableHead>
+            <TableHead>MH ID</TableHead>
+            <TableHead>MHM Level (in)</TableHead>
             <TableHead>Reference Level (in)</TableHead>
-            <TableHead>Alerts</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {sites.map((site) => {
-            const isSelected = selectedSiteId === site.siteId;
+            const isSelected = selectedSiteId === site.id;
 
             return (
               <TableRow
-                key={site.siteId}
+                key={site.id}
                 className={`cursor-pointer transition-colors ${
                   isSelected
                     ? 'bg-blue-50 hover:bg-blue-50 border-l-4 border-blue-500'
@@ -40,46 +38,23 @@ export const SitesTable = ({ sites, onSiteSelect, selectedSiteId }) => {
                 <TableCell
                   className={`font-medium ${isSelected ? 'text-blue-700' : ''}`}
                 >
-                  {site.siteId}
+                  {site.mh_id}
                 </TableCell>
-                <TableCell className="max-w-xs truncate">
-                  {site.siteName}
-                </TableCell>
+
                 <TableCell>
                   <div className="flex flex-col">
-                    <span className="font-medium">
-                      {site.manholeMetrics.currentLevel}"
-                    </span>
+                    <span className="font-medium">MHM Level</span>
                     <span className="text-xs text-gray-500">
-                      ID: {site.manholeMetrics.id}
+                      Device ID: {site.mhm_id}
                     </span>
                   </div>
                 </TableCell>
                 <TableCell>
                   <div className="flex flex-col">
-                    <span className="font-medium">
-                      {site.referenceLevel.currentLevel}"
-                    </span>
+                    <span className="font-medium">Ref Level</span>
                     <span className="text-xs text-gray-500">
-                      {site.referenceLevel.type}: {site.referenceLevel.id}
+                      {site.ref_type}: {site.ref_id}
                     </span>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div className="flex flex-wrap gap-1 max-w-xs">
-                    {site.alerts.length > 0 ? (
-                      site.alerts.map((alert) => (
-                        <Badge
-                          key={alert}
-                          variant="destructive"
-                          className="text-xs"
-                        >
-                          {alert}
-                        </Badge>
-                      ))
-                    ) : (
-                      <span className="text-xs text-gray-400">No alerts</span>
-                    )}
                   </div>
                 </TableCell>
               </TableRow>

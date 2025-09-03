@@ -17,26 +17,16 @@ import { Label } from '@/components/ui/label';
 //   Legend,
 // } from 'recharts';
 
-import {
-  getLevelDifference,
-  getLevelStatus,
-  getVarianceDescription,
-} from '../utils/calculations'; // Import from utils
+// import {
+//   getLevelDifference,
+//   getLevelStatus,
+//   getVarianceDescription,
+// } from '../utils/calculations'; // Import from utils
 import { WARNING_LEVEL, CHART_COLORS } from '../constants/constants';
 
-interface SiteDetailViewProps {
-  site: ManholeSite;
-  timeSeriesData: TimeSeriesData[];
-  onClose: () => void;
-}
-
-export const SiteDetailView = ({
-  site,
-  timeSeriesData,
-  onClose,
-}: SiteDetailViewProps) => {
-  const difference = getLevelDifference(site);
-  const status = getLevelStatus(difference);
+export const SiteDetailView = ({ site, onClose }) => {
+  // const difference = getLevelDifference(site);
+  // const status = getLevelStatus(difference);
 
   return (
     <div className="h-full flex flex-col">
@@ -44,10 +34,10 @@ export const SiteDetailView = ({
       <div className="flex-shrink-0 p-6 border-b border-gray-200">
         <div className="flex items-center justify-between">
           <div className="min-w-0 flex-1">
+            <p className="text-sm text-gray-600 truncate">MH Site</p>
             <h2 className="text-xl font-semibold text-gray-900 truncate">
-              {site.siteId}
+              {site.mh_id}
             </h2>
-            <p className="text-sm text-gray-600 truncate">{site.siteName}</p>
           </div>
           <Button
             variant="ghost"
@@ -104,7 +94,7 @@ export const SiteDetailView = ({
             <CardContent>
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={timeSeriesData}>
+                  <LineChart data={}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                     <XAxis dataKey="time" stroke="#6b7280" fontSize={10} />
                     <YAxis
@@ -171,63 +161,27 @@ export const SiteDetailView = ({
               </CardHeader>
               <CardContent>
                 <div className="space-y-1">
-                  <p className="text-xs text-gray-500">
-                    ID: {site.manholeMetrics.id}
-                  </p>
-                  <p className="text-lg font-bold">
-                    {site.manholeMetrics.currentLevel}"
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {site.manholeMetrics.fillPercentage}% full
-                  </p>
+                  <p className="text-xs text-gray-500">ID: {site.mhm_id}</p>
+                  <p className="text-lg font-bold">MHM Level here</p>
+                  <p className="text-xs text-gray-500">MHM Fill%</p>
                 </div>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm text-purple-600">
-                  Reference ({site.referenceLevel.type})
+                  Reference ({site.ref_type})
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-1">
-                  <p className="text-xs text-gray-500">
-                    ID: {site.referenceLevel.id}
-                  </p>
-                  <p className="text-lg font-bold">
-                    {site.referenceLevel.currentLevel}"
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {site.referenceLevel.fillPercentage}% full
-                  </p>
+                  <p className="text-xs text-gray-500">ID: {site.ref_id}</p>
+                  <p className="text-lg font-bold">Ref Level here</p>
+                  <p className="text-xs text-gray-500">ref fill% full</p>
                 </div>
               </CardContent>
             </Card>
           </div>
-
-          {/* Alerts */}
-          {site.alerts.length > 0 && (
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm text-red-600">
-                  Active Alerts
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-2">
-                  {site.alerts.map((alert) => (
-                    <Badge
-                      key={alert}
-                      variant="destructive"
-                      className="text-xs"
-                    >
-                      {alert}
-                    </Badge>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
         </div>
       </div>
     </div>

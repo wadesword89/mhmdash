@@ -1,0 +1,43 @@
+// Establish dataset for site areas
+export const sites = [
+  {
+    id: 1,
+    mh_id: '10-211-47',
+    mhm_id: 951,
+    ref_id: 'ALB-0212A_001',
+    ref_type: 'ADS',
+    coordinates: [37.89478796348573, -122.28723113920972],
+  },
+  {
+    id: 2,
+    mh_id: '10-000-16',
+    mhm_id: 976,
+    ref_id: 'ALB-0212A_004',
+    ref_type: 'ADS',
+    coordinates: [37.898147, -122.30243],
+  },
+  {
+    id: 3,
+    mh_id: '13-004-17',
+    mhm_id: 970,
+    ref_id: 'ALB-0212B_001',
+    ref_type: 'ADS',
+    coordinates: [37.884122, -122.284607],
+  },
+  {
+    id: 4,
+    mh_id: 'A51',
+    mhm_id: 959,
+    ref_id: 'Alice St. Upstream',
+    ref_type: 'LMS',
+    coordinates: [37.79299926, -122.275001],
+  },
+  {
+    id: 5,
+    mh_id: '???',
+    mhm_id: 963,
+    ref_id: 'Oakland Estuary Overflow',
+    ref_type: 'LMS',
+    coordinates: [37.79199981, -122.273002],
+  },
+];

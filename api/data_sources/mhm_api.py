@@ -45,8 +45,8 @@ def to_unix_seconds(value):
     )
 
 
-def fetch_levels(
-    device_id, start_time, end_time, api_key, pause_between_requests=0.4, max_retries=2
+def fetchMHMLevelData(
+    start_time, end_time, device_id, pause_between_requests=0.4, max_retries=2
 ):
     """
     Return all level measurements for a device within the time window [start_time, end_time].
@@ -62,7 +62,7 @@ def fetch_levels(
       "measurements": [{"t": 1748377262, "levelMm": 118.0}, ...]  # t = UNIX seconds
     }
     """
-    headers = {"api_key": api_key}
+    headers = {"api_key": API_KEY}
     start_unix = to_unix_seconds(start_time)
     end_unix = to_unix_seconds(end_time)
     if end_unix < start_unix:
@@ -146,15 +146,13 @@ def fetch_levels(
         "measurements": all_points,
     }
 
-"""
+
 # ---- Example usage ----
-result = fetch_levels(
+result = fetchMHMLevelData(
     device_id=951,
     start_time="2025-09-01T00:00:00Z",
     end_time="2025-09-02T23:59:59Z",
-    api_key=API_KEY,
 )
 
 # Print compact JSON for Next.js frontend
 print(json.dumps(result, indent=2))
-"""
