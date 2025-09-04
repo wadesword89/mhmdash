@@ -38,10 +38,10 @@ def requestPrismDepthData(startTime: str, endTime: str):
     return data
 
 
-start = '2025-03-01T00:00:00'
-end = '2025-03-01T00:59:59'
-result = requestPrismDepthData(start, end)
-print(result)
+# start = '2025-03-01T00:00:00'
+# end = '2025-03-01T00:59:59'
+# result = requestPrismDepthData(start, end)
+# print(result)
 
 
 def requestPrismTempData(startTime: str, endTime: str):

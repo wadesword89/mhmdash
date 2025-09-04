@@ -18,10 +18,7 @@ export default function EBMUDDashboard() {
   const handleSiteSelect = (site) => {
     setSelectedSite(site);
   };
-  const base =
-    process.env.NODE_ENV === 'development'
-      ? 'http://localhost:8000'
-      : process.env.NEXT_PUBLIC_BACKEND_BASE;
+  // console.log('Selected Site:', selectedSite);
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">

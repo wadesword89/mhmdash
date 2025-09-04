@@ -2,40 +2,71 @@
 
 import { X, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { useMemo, useState, useEffect } from 'react';
+import { sites } from '@/lib/sites';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-// import {
-//   LineChart,
-//   Line,
-//   XAxis,
-//   YAxis,
-//   CartesianGrid,
-//   ResponsiveContainer,
-//   ReferenceLine,
-//   Legend,
-// } from 'recharts';
-
-// import {
-//   getLevelDifference,
-//   getLevelStatus,
-//   getVarianceDescription,
-// } from '../utils/calculations'; // Import from utils
-import { WARNING_LEVEL, CHART_COLORS } from '../constants/constants';
 
 export const SiteDetailView = ({ site, onClose }) => {
-  // const difference = getLevelDifference(site);
-  // const status = getLevelStatus(difference);
+  // State to hold MHM data
+  const [mhmData, setMhmData] = useState(null);
+  const base =
+    process.env.NODE_ENV === 'development'
+      ? 'http://localhost:8000'
+      : process.env.NEXT_PUBLIC_BACKEND_BASE;
+
+  // Calculate default dates for last 24 hours
+  const { startTime, endTime } = useMemo(() => {
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+
+    // Format as YYYY-MM-DD
+    const format = (d) => d.toISOString().slice(0, 10);
+
+    return {
+      startTime: format(yesterday),
+      endTime: format(today),
+    };
+  }, []);
+
+  // console.log('site:', site);
+  // console.log('startTime:', startTime);
+  // console.log('endTime:', endTime);
+
+  // Fetch data from MHM Api for the selected site and date range
+  useEffect(() => {
+    const fetchMhmLevel = async () => {
+      try {
+        const mhmRes = await fetch(`${base}/api/py/mhm_level`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            startTime,
+            endTime,
+            deviceId: site.mhm_id,
+          }),
+        });
+        const data = await mhmRes.json();
+        setMhmData(data);
+        console.log('MHM Data:', data);
+      } catch (error) {
+        console.error('Error fetching MHM level:', error);
+      }
+    };
+
+    fetchMhmLevel();
+  }, [base, startTime, endTime, site.mhm_id]);
 
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
-      <div className="flex-shrink-0 p-6 border-b border-gray-200">
+      <div className="flex-shrink-0 p-6 border-b border-gray-200 shadow-sm bg-gray-100/30">
         <div className="flex items-center justify-between">
           <div className="min-w-0 flex-1">
-            <p className="text-sm text-gray-600 truncate">MH Site</p>
-            <h2 className="text-xl font-semibold text-gray-900 truncate">
+            <p className="text-sm text-gray-600 mt-4">MH ID:</p>
+            <h2 className="text-xl font-semibold text-gray-900">
               {site.mh_id}
             </h2>
           </div>
@@ -56,18 +87,18 @@ export const SiteDetailView = ({ site, onClose }) => {
           {/* Date Time Pickers */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-sm">Time Range</CardTitle>
+              <CardTitle className="">Time Range</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-8">
                 <div>
                   <Label htmlFor="start-date" className="text-sm">
                     Start Date
                   </Label>
                   <Input
                     id="start-date"
-                    type="datetime-local"
-                    defaultValue="2024-01-15T00:00"
+                    type="date"
+                    defaultValue={startTime}
                     className="mt-1"
                   />
                 </div>
@@ -77,80 +108,23 @@ export const SiteDetailView = ({ site, onClose }) => {
                   </Label>
                   <Input
                     id="end-date"
-                    type="datetime-local"
-                    defaultValue="2024-01-15T16:00"
+                    type="date"
+                    defaultValue={endTime}
                     className="mt-1"
                   />
                 </div>
               </div>
             </CardContent>
           </Card>
-
-          {/* Comparison Chart */}
-          {/* <Card>
-            <CardHeader>
-              <CardTitle className="text-sm">Sensor Level Comparison</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                    <XAxis dataKey="time" stroke="#6b7280" fontSize={10} />
-                    <YAxis
-                      stroke="#6b7280"
-                      fontSize={10}
-                      label={{
-                        value: 'Level (inches)',
-                        angle: -90,
-                        position: 'insideLeft',
-                      }}
-                    />
-                    <ReferenceLine
-                      y={WARNING_LEVEL}
-                      stroke={CHART_COLORS.WARNING}
-                      strokeDasharray="5 5"
-                      label={{
-                        value: 'Warning (3\'5.5")',
-                        position: 'topRight',
-                      }}
-                    />
-                    <Legend />
-                    <Line
-                      type="monotone"
-                      dataKey="manholeMetrics"
-                      stroke={CHART_COLORS.MANHOLE_METRICS}
-                      strokeWidth={2}
-                      dot={false}
-                      name="MM"
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="referenceLevel"
-                      stroke={CHART_COLORS.REFERENCE}
-                      strokeWidth={2}
-                      dot={false}
-                      name={`Ref (${site.referenceLevel.type})`}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="rainfall"
-                      stroke={CHART_COLORS.RAINFALL}
-                      strokeWidth={2}
-                      dot={false}
-                      name="Rain"
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card> */}
+          
+          {/* Chart Comparison */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-sm">Sensor Level Comparison</CardTitle>
+              <CardTitle className="">Sensor Level Comparison</CardTitle>
             </CardHeader>
-            <CardContent>CHART HERE</CardContent>
+            <CardContent>{mhmData?.deviceId}</CardContent>
           </Card>
+
           {/* Sensor Information */}
           <div className="grid grid-cols-2 gap-4">
             <Card>

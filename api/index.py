@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from api.data_sources.prism_api import fetchPrismDepthData
+from api.data_sources.prism_api import requestPrismDepthData
 from api.data_sources.mhm_api import fetchMHMLevelData
 from datetime import datetime
 
@@ -38,8 +38,8 @@ async def prism_depth(request: Request):
             raise HTTPException(
                 status_code=400, detail="startTime and endTime are required"
             )
-        data = fetchPrismDepthData(startTime, endTime)
-        
+        data = requestPrismDepthData(startTime, endTime)
+
         # normalizing PRISM’s timestamp strings into UNIX seconds format
         out = []
         for item in data:
@@ -72,15 +72,13 @@ async def mhm_level(request: Request):
         body = await request.json()
         startTime = body.get("startTime")
         endTime = body.get("endTime")
-        deviceId = body.get(
-            "deviceId", 951
-        )  # Default deviceId to 951 if not provided *CHANGE EVENTUALLY*
+        deviceId = body.get("deviceId")
 
         if not startTime or not endTime:
             raise HTTPException(
                 status_code=400, detail="startTime and endTime are required"
             )
-        data = await fetchMHMLevelData(startTime, endTime, deviceId)
+        data = fetchMHMLevelData(startTime, endTime, deviceId)
 
         # Convert measurements to inches for the UI
         series = [
@@ -99,10 +97,6 @@ async def mhm_level(request: Request):
             "timeSeries": series,
         }
 
-        if not result or not result.get("devices"):
-            raise HTTPException(
-                status_code=404, detail="No MHM data in specified timeframe"
-            )
         return result
 
     except HTTPException:

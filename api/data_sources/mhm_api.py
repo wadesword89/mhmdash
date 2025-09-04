@@ -50,7 +50,7 @@ def fetchMHMLevelData(
 ):
     """
     Return all level measurements for a device within the time window [start_time, end_time].
-
+    Time inputs can be UNIX seconds, ISO8601 strings, or datetime objects.
     Output shape:
     {
       "deviceId": "951",
@@ -155,4 +155,4 @@ result = fetchMHMLevelData(
 )
 
 # Print compact JSON for Next.js frontend
-print(json.dumps(result, indent=2))
+# print(json.dumps(result, indent=2))
