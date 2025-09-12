@@ -6,13 +6,12 @@ import {
   ChartTooltipContent,
 } from '@/components/ui/chart';
 
-export function DepthChart({ data }) {
-  const mhmData = data.mhmData?.timeSeries || [];
-  // const prismData = data.prismData[0]
+export function DepthChart({ site, data }) {
+  const mhmData = data.mhmData?.timeSeries;
+  const refData = data.data;
 
-  console.log('data:', data);
-  console.log('mhmData:', mhmData);
-  // console.log('prismData:', prismData);
+  // console.log('data:', data);
+  
 
   return (
     <>

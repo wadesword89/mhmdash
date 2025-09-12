@@ -34,13 +34,12 @@ async def prism_depth(request: Request):
         startTime = body.get("startTime")
         endTime = body.get("endTime")
         locationId = body.get("locationId")
-        # print(startTime, endTime, locationId)
-        
+
         if not startTime or not endTime:
             raise HTTPException(
                 status_code=400, detail="startTime and endTime are required"
             )
-        
+
         result = requestPrismDepthData(startTime, endTime, locationId)
 
         if not result:
@@ -82,7 +81,6 @@ async def mhm_level(request: Request):
             "window": data["window"],
             "timeSeries": series,
         }
-        # print("data from mhm api:", result)
         return result
 
     except HTTPException:
@@ -90,3 +88,65 @@ async def mhm_level(request: Request):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/py/site_data")
+async def site_data(req: Request):
+    body = await req.json()
+    site = body.get("site")
+    startTime = body.get("startTime")
+    endTime = body.get("endTime")
+
+    # --- MHM (always) ---
+    try:
+        mhm_raw = fetchMHMLevelData(startTime, endTime, site["mhm_id"])
+        mhm_series = [
+            {"t": p["t"], "levelIn": mm_to_inches(p.get("levelMm"))}
+            for p in mhm_raw.get("measurements", [])
+            if p.get("levelMm") is not None
+        ]
+        mhm = {
+            "deviceId": mhm_raw.get("deviceId"),
+            "lastWaterLevelIn": mm_to_inches(mhm_raw.get("lastWaterLevelMm")),
+            "lastFillPercent": mhm_raw.get("lastFillPercent"),
+            "timeSeries": mhm_series,
+        }
+    except Exception as e:
+        mhm = {"error": str(e), "timeSeries": []}
+
+    # --- Reference (branch ADS/LMS/None) ---
+    ref_type = site.get("ref_type")
+    reference = {"type": None, "meta": {}, "timeSeries": []}
+
+    if ref_type == "ADS":
+        try:
+            prism_raw = requestPrismDepthData(startTime, endTime, site.get("ref_locId"))
+
+            reference = prism_raw[0]["entityData"][0]
+
+        except Exception as e:
+            reference = {"type": "ADS", "meta": {}, "timeSeries": [], "error": str(e)}
+
+    elif ref_type == "LMS":
+        # Stub until you wire it up
+        reference = {
+            "type": "LMS",
+            "meta": {},
+            "timeSeries": [],
+            "error": "LMS not implemented",
+        }
+
+    return {
+        "site": {
+            "site_id": site.get("id"),
+            "mh_id": site.get("mh_id"),
+            "mhm_id": site.get("mhm_id"),
+            "ref_type": site.get("ref_type"),
+            "ref_id": site.get("ref_id"),
+            "ref_locId": site.get("ref_locId"),
+            "coordinates": site.get("coordinates"),
+        },
+        "timeframe": {"start": startTime, "end": endTime},
+        "mhm": mhm,
+        "ref": reference,
+    }

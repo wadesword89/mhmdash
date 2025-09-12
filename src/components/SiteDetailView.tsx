@@ -24,7 +24,7 @@ dayjs.extend(utc); //add UTC (Coordinated Universal Time) support to parse, mani
 export const SiteDetailView = ({ site, onClose }) => {
   // State to hold MHM data
   const [mhmData, setMhmData] = useState(null);
-  const [prismData, setPrismData] = useState(null);
+  const [refData, setRefData] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const base =
@@ -72,59 +72,36 @@ export const SiteDetailView = ({ site, onClose }) => {
     }
   };
 
-  // Fetch data from MHM Api for the selected site and date range
-  const fetchMhmData = async (startTime, endTime) => {
+  const fetchSiteData = async (site, startTime, endTime) => {
     setLoading(true);
     try {
-      const mhmRes = await fetch(`${base}/api/py/mhm_level`, {
+      const res = await fetch(`${base}/api/py/site_data`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          site,
+
           startTime,
           endTime,
-          deviceId: site.mhm_id,
         }),
       });
-      const data = await mhmRes.json();
-      setMhmData(data);
-      console.log('MHM Data:', data);
-    } catch (error) {
-      console.error('Error fetching MHM level:', error);
+      if (!res.ok) throw new Error(await res.text());
+
+      const data = await res.json();
+      // console.log('site_data response:', data);
+
+      setMhmData(data.mhm);
+      setRefData(data.ref);
+    } catch (e) {
+      console.error('site_data error:', e);
     } finally {
       setLoading(false);
     }
   };
 
-  // Fetch PRISM depth data for the selected location and date range
-  const fetchPrismData = async (startTime, endTime) => {
-    setLoading(true);
-    try {
-      const prismRes = await fetch(`${base}/api/py/prism_depth`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          startTime,
-          endTime,
-          locationId: site.ref_locId,
-        }),
-      });
-      const data = await prismRes.json();
-      setPrismData(data);
-      // console.log('PRISM Data:', data);
-    } catch (error) {
-      console.error('Error fetching PRISM depth:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Initial fetch on component mount
   useEffect(() => {
-    fetchMhmData(startTime, endTime);
-    if (site.ref_type === 'ADS') {
-      fetchPrismData(startTime, endTime);
-    }
-  }, [base, site.mhm_id, startTime, endTime, site.ref_id]);
+    fetchSiteData(site, startTime, endTime);
+  }, [site, startTime, endTime]);
 
   return (
     <div className="h-full flex flex-col">
@@ -236,8 +213,8 @@ export const SiteDetailView = ({ site, onClose }) => {
                     Loading sensor data...
                   </span>
                 </div>
-              ) : mhmData || prismData ? (
-                <DepthChart data={{ mhmData, prismData }} />
+              ) : mhmData || refData ? (
+                <DepthChart site={site} data={{ mhmData, refData }} />
               ) : (
                 <div className="text-center py-8 text-gray-500">
                   Data Could Not Be Loaded
