@@ -130,8 +130,7 @@ def fetchMHMLevelData(
 
     # Sort just in case
     all_points.sort(key=lambda x: x["t"])
-
-    return {
+    data = {
         **(
             meta
             or {
@@ -145,13 +144,15 @@ def fetchMHMLevelData(
         "window": {"startUnix": start_unix, "endUnix": end_unix},
         "measurements": all_points,
     }
+    # print("data from mhm api:", json.dumps(data, indent=2))
+    return data
 
 
 # ---- Example usage ----
 result = fetchMHMLevelData(
-    device_id=951,
-    start_time="2025-09-01T00:00:00Z",
-    end_time="2025-09-02T23:59:59Z",
+    device_id=976,
+    start_time="2025-05-28T00:00:00Z",
+    end_time="2025-05-28T23:59:59Z",
 )
 
 # Print compact JSON for Next.js frontend

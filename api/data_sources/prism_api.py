@@ -5,14 +5,14 @@ import os
 load_dotenv()
 
 
-def requestPrismDepthData(startTime: str, endTime: str):
+def requestPrismDepthData(startTime: str, endTime: str, locationId: int):
     """
     Fetch FM depth data from ADS PRISM API.
 
     Args:
         startTime: ISO 8601 formatted datetime string (e.g. '2025-03-01T00:00:00')
         endTime: ISO 8601 formatted datetime string (e.g. '2025-03-01T23:59:59')
-
+        locationId: Integer representing the location ID (which is id of the FM device) to fetch data for
     Returns:
         Dict containing the API response data"
     """
@@ -30,17 +30,18 @@ def requestPrismDepthData(startTime: str, endTime: str):
 
     # locationId: 2 -> 7 = "ALB_0212A_001" -> "ALB_0212A_006"
 
-    url = f"https://api.adsprism.com/api/Telemetry?locationId=2&locationId=3&locationId=4&locationId=5&locationId=6&locationId=7&entityId={entityId}&start={startArr[0]}%3A{startArr[1]}%3A{startArr[2]}&end={endArr[0]}%3A{endArr[1]}%3A{endArr[2]}"
+    url = f"https://api.adsprism.com/api/Telemetry?locationId=2&locationId={locationId}&entityId={entityId}&start={startArr[0]}%3A{startArr[1]}%3A{startArr[2]}&end={endArr[0]}%3A{endArr[1]}%3A{endArr[2]}"
 
     response = requests.get(url, headers=headers)
     data = response.json()
-
+    # print("data from prism api:", data)
     return data
 
 
-# start = '2025-03-01T00:00:00'
-# end = '2025-03-01T00:59:59'
-# result = requestPrismDepthData(start, end)
+# start = '2025-09-08T00:00:00'
+# end = '2025-09-08T00:59:59'
+# locationId = 2
+# result = requestPrismDepthData(start, end, locationId)
 # print(result)
 
 

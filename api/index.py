@@ -33,29 +33,15 @@ async def prism_depth(request: Request):
         body = await request.json()
         startTime = body.get("startTime")
         endTime = body.get("endTime")
-
+        locationId = body.get("locationId")
+        # print(startTime, endTime, locationId)
+        
         if not startTime or not endTime:
             raise HTTPException(
                 status_code=400, detail="startTime and endTime are required"
             )
-        data = requestPrismDepthData(startTime, endTime)
-
-        # normalizing PRISM’s timestamp strings into UNIX seconds format
-        out = []
-        for item in data:
-            loc = item.get("locationId")
-            points = []
-            for row in item.get("values", []):
-                # ADS timestamps often ISO or epoch ms; adjust parsing if needed
-                ts = row["timestamp"]  # e.g. "2025-03-01T00:15:00"
-                # If it’s ISO, convert to unix seconds
-                dt = datetime.fromisoformat(ts.replace("Z", "+00:00"))
-                unix = int(dt.timestamp())
-                val = row.get("value")
-                points.append({"t": unix, "referenceLevel": val})
-            out.append({"locationId": loc, "points": points})
-
-        result = out
+        
+        result = requestPrismDepthData(startTime, endTime, locationId)
 
         if not result:
             raise HTTPException(status_code=404, detail="Data not found in PRISM API")
@@ -80,9 +66,9 @@ async def mhm_level(request: Request):
             )
         data = fetchMHMLevelData(startTime, endTime, deviceId)
 
-        # Convert measurements to inches for the UI
+        # Convert level to inches
         series = [
-            {"t": p["t"], "manholeMetrics": mm_to_inches(p["levelMm"])}
+            {"t": p["t"], "levelIn": mm_to_inches(p["levelMm"])}
             for p in data["measurements"]
             if p.get("levelMm") is not None
         ]
@@ -90,13 +76,13 @@ async def mhm_level(request: Request):
         result = {
             "deviceId": data["deviceId"],
             "coordinates": data["coordinates"],
-            "maxDistanceMm": data["maxDistanceMm"],
+            "maxDistanceIn": mm_to_inches(data["maxDistanceMm"]),
             "lastWaterLevelIn": mm_to_inches(data["lastWaterLevelMm"]),
             "lastFillPercent": data["lastFillPercent"],
             "window": data["window"],
             "timeSeries": series,
         }
-
+        # print("data from mhm api:", result)
         return result
 
     except HTTPException:
