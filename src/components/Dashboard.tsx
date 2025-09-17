@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Header } from './Header';
 import { SitesTable } from './SitesTable';
 import { SiteDetailView } from './SiteDetailView';
+import { Footer } from './Footer';
+
 import { sites } from '@/lib/sites';
 import dynamic from 'next/dynamic';
 // Dynamically import Leaflet Map with SSR disabled (avoids ReferenceError: window is not defined)
@@ -31,14 +33,14 @@ export default function EBMUDDashboard() {
             selectedSite ? 'w-1/2' : 'w-full'
           } overflow-auto`}
         >
-          <div className="p-6">
-            <MapView />
+          <div className="p-6 space-y-6">
+            <MapView sites={sites} onSiteClick={handleSiteSelect} />
 
             <Card>
               <CardHeader>
                 <CardTitle className="text-xl">Manhole Sites</CardTitle>
               </CardHeader>
-              <CardContent className="p-6">
+              <CardContent className="px-6 py-3">
                 <SitesTable
                   onSiteSelect={handleSiteSelect}
                   selectedSiteId={selectedSite?.id}
@@ -58,6 +60,7 @@ export default function EBMUDDashboard() {
           </div>
         )}
       </div>
+      <Footer />
     </div>
   );
 }

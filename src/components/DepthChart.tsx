@@ -149,11 +149,11 @@ export function DepthChart({ site, data }) {
 
   const chartConfig = {
     mhmLevel: {
-      label: `MHM ${site.mhm_id} Level (inches)`,
+      label: `MHM ${site.mhm_id}`,
       color: '#2563eb', // Blue
     },
     refLevel: {
-      label: `${site.ref_type} ${site.ref_id} Level`,
+      label: `${site.ref_type} ${site.ref_id}`,
       color: '#dc2626', // Red
     },
   };
@@ -161,11 +161,9 @@ export function DepthChart({ site, data }) {
   return (
     <div className="w-full">
       <div className="mb-4">
-        <h3 className="text-lg font-semibold">
-          Sewer Level Comparison - Site {site.mh_id}
-        </h3>
+        <h3 className="font-semibold">MH ID: {site.mh_id}</h3>
         <p className="text-sm text-muted-foreground">
-          MHM Device {site.mhm_id} vs {site.ref_type} Reference {site.ref_id}
+          MHM Device: {site.mhm_id} vs {site.ref_type} Reference: {site.ref_id}
         </p>
         {!hasMhmData && hasRefData && (
           <div className="mt-2 px-3 py-1 bg-yellow-50 border border-red-200 rounded-md">
@@ -198,7 +196,7 @@ export function DepthChart({ site, data }) {
           />
           <YAxis
             tick={{ fontSize: 12 }}
-            label={{ value: 'Level', angle: -90, position: 'insideLeft' }}
+            label={{ value: 'Level (in.)', angle: -90, position: 'insideLeft' }}
           />
           <ChartTooltip
             content={<ChartTooltipContent />}
@@ -228,7 +226,7 @@ export function DepthChart({ site, data }) {
 
       <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
         <div className="space-y-1">
-          <div className="font-medium">MHM Device {site.mhm_id}</div>
+          <div className="font-medium">MHM Device: {site.mhm_id}</div>
           {hasMhmData ? (
             <>
               <div className="text-muted-foreground">
@@ -251,7 +249,7 @@ export function DepthChart({ site, data }) {
         </div>
         <div className="space-y-1">
           <div className="font-medium">
-            {site.ref_type} {site.ref_id}
+            {site.ref_type}: {site.ref_id}
           </div>
           {hasRefData ? (
             <>
