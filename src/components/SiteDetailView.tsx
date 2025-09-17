@@ -223,50 +223,7 @@ export const SiteDetailView = ({ site, onClose }) => {
             </CardContent>
           </Card>
 
-          {/* Sensor Information */}
-          <div className="grid grid-cols-2 gap-4">
-            <Card>
-              <CardHeader className="">
-                <CardTitle className="text-sm text-blue-600">
-                  Manhole Metrics
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-1">
-                  <p className="text-xs text-gray-500">ID: {site.mhm_id}</p>
-                  {loading ? (
-                    <div className="flex items-center">
-                      <Loader2 className="h-4 w-4 animate-spin mr-1" />
-                      <span className="text-sm">Loading...</span>
-                    </div>
-                  ) : (
-                    <>
-                      <p className="text-lg font-bold">
-                        {mhmData?.lastWaterLevelIn}"
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        Fill: {mhmData?.lastFillPercent}%
-                      </p>
-                    </>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="">
-                <CardTitle className="text-sm text-purple-600">
-                  Reference ({site.ref_type})
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-1">
-                  <p className="text-xs text-gray-500">ID: {site.ref_id}</p>
-                  <p className="text-lg font-bold">Ref Level here</p>
-                  {/* <p className="text-xs text-gray-500">Fill: Ref Fill%</p> */}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          
         </div>
       </div>
     </div>
