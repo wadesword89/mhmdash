@@ -153,7 +153,7 @@ export function DepthChart({ site, data }) {
       color: '#2563eb', // Blue
     },
     refLevel: {
-      label: `${site.ref_type} ${site.ref_id}`,
+      label: `${site.ref_source} ${site.ref_id}`,
       color: '#dc2626', // Red
     },
   };
@@ -163,7 +163,7 @@ export function DepthChart({ site, data }) {
       <div className="mb-4">
         <h3 className="font-semibold">MH ID: {site.mh_id}</h3>
         <p className="text-sm text-muted-foreground">
-          MHM Device: {site.mhm_id} vs {site.ref_type} Reference: {site.ref_id}
+          MHM Device: {site.mhm_id} vs {site.ref_source} Reference: {site.ref_id}
         </p>
         {!hasMhmData && hasRefData && (
           <div className="mt-2 px-3 py-1 bg-yellow-50 border border-red-200 rounded-md">
@@ -249,7 +249,7 @@ export function DepthChart({ site, data }) {
         </div>
         <div className="space-y-1">
           <div className="font-medium">
-            {site.ref_type}: {site.ref_id}
+            {site.ref_source}: {site.ref_id}
           </div>
           {hasRefData ? (
             <>

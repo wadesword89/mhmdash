@@ -114,26 +114,26 @@ async def site_data(req: Request):
     except Exception as e:
         mhm = {"error": str(e), "timeSeries": []}
 
-    # --- Reference (branch ADS/LMS/None) ---
-    ref_type = site.get("ref_type")
-    reference = {"type": None, "meta": {}, "timeSeries": []}
+    # --- Reference (branch ADS/EBMUD/None) ---
+    ref_source = site.get("ref_source")
+    reference = {"source": None, "meta": {}, "timeSeries": []}
 
-    if ref_type == "ADS":
+    if ref_source == "ADS":
         try:
             prism_raw = requestPrismDepthData(startTime, endTime, site.get("ref_locId"))
 
             reference = prism_raw[0]["entityData"][0]
 
         except Exception as e:
-            reference = {"type": "ADS", "meta": {}, "timeSeries": [], "error": str(e)}
+            reference = {"source": "ADS", "meta": {}, "timeSeries": [], "error": str(e)}
 
-    elif ref_type == "LMS":
+    elif ref_source == "EBMUD":
         # Stub until you wire it up
         reference = {
-            "type": "LMS",
+            "source": "EBMUD",
             "meta": {},
             "timeSeries": [],
-            "error": "LMS not implemented",
+            "error": "EBMUD source not implemented",
         }
 
     return {
@@ -141,7 +141,7 @@ async def site_data(req: Request):
             "site_id": site.get("id"),
             "mh_id": site.get("mh_id"),
             "mhm_id": site.get("mhm_id"),
-            "ref_type": site.get("ref_type"),
+            "ref_source": site.get("ref_source"),
             "ref_id": site.get("ref_id"),
             "ref_locId": site.get("ref_locId"),
             "coordinates": site.get("coordinates"),

@@ -19,7 +19,7 @@ export const SitesTable = ({ onSiteSelect, selectedSiteId }) => {
             <TableHead className="font-bold">MH ID</TableHead>
             <TableHead className="font-bold">MHM ID </TableHead>
             <TableHead className="font-bold">Reference ID</TableHead>
-            <TableHead className="font-bold">Reference Type</TableHead>
+            <TableHead className="font-bold">Reference Source</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -31,7 +31,7 @@ export const SitesTable = ({ onSiteSelect, selectedSiteId }) => {
                 key={site.id}
                 className={`cursor-pointer transition-colors ${
                   isSelected
-                    ? 'bg-blue-50 hover:bg-blue-50 border-l-4 border-blue-500'
+                    ? 'bg-blue-50 hover:bg-blue-50 border-l-4 border-b-0 border-blue-500'
                     : 'hover:bg-gray-50'
                 }`}
                 onClick={() => onSiteSelect(site)}
@@ -54,7 +54,7 @@ export const SitesTable = ({ onSiteSelect, selectedSiteId }) => {
                 </TableCell>
                 <TableCell>
                   <div className="flex flex-col">
-                    <span className="font-medium">{site.ref_type} </span>
+                    <span className="font-medium">{site.ref_source} </span>
                   </div>
                 </TableCell>
               </TableRow>

@@ -1,12 +1,10 @@
 'use client';
-
-import { useState, useMemo, useEffect } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Header } from './Header';
 import { SitesTable } from './SitesTable';
 import { SiteDetailView } from './SiteDetailView';
 import { Footer } from './Footer';
-
 import { sites } from '@/lib/sites';
 import dynamic from 'next/dynamic';
 // Dynamically import Leaflet Map with SSR disabled (avoids ReferenceError: window is not defined)

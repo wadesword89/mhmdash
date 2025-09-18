@@ -73,8 +73,8 @@ export default function MapView({ sites = [], onSiteClick = null }) {
   // Get icon based on site data availability or status
   const getSiteIcon = (site) => {
     // You can customize this logic based on your needs
-    if (site.ref_type === 'LMS') return redIcon; // LMS sites might not have data
-    if (site.ref_type === 'ADS') return greenIcon; // ADS sites have reference data
+    if (site.ref_source === 'EBMUD') return redIcon; // EBMUD sites might not have data
+    if (site.ref_source === 'ADS') return greenIcon; // ADS sites have reference data
     return blueIcon; // Default
   };
 
@@ -120,15 +120,15 @@ export default function MapView({ sites = [], onSiteClick = null }) {
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
-                  <span className="font-medium text-gray-600">Type:</span>
+                  <span className="font-medium text-gray-600">Ref. Source:</span>
                   <span
                     className={`px-2 py-1 rounded text-xs font-medium ${
-                      site.ref_type === 'ADS'
+                      site.ref_source === 'ADS'
                         ? 'bg-green-100 text-green-800'
                         : 'bg-red-100 text-red-800'
                     }`}
                   >
-                    {site.ref_type}
+                    {site.ref_source}
                   </span>
                 </div>
 
