@@ -130,15 +130,14 @@ export const SiteDetailView = ({ site, onClose }) => {
       {/* Content */}
       <div className="flex-1 overflow-auto p-6">
         <div className="space-y-6">
+          
           {/* Date Time Pickers */}
           <Card>
             <CardHeader>
               <CardTitle className="">Time Range</CardTitle>
             </CardHeader>
             <CardContent>
-              <DateRangePicker />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
                 {/* Start Date Picker */}
                 <div className="space-y-2">
                   <Label htmlFor="start-date">Start Date</Label>
@@ -200,7 +199,6 @@ export const SiteDetailView = ({ site, onClose }) => {
                     </PopoverContent>
                   </Popover>
                 </div>
-
               </div>
             </CardContent>
           </Card>

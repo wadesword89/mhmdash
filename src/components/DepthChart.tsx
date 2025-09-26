@@ -20,7 +20,7 @@ export function DepthChart({ site, data }) {
   const mhmData = data?.mhmData;
   const refData = data?.refData;
   const rainfallData = data?.rainData;
-  console.log('Rainfall data:', rainfallData);
+  console.log('Data:', data);
 
   const hasMhmData = mhmData?.timeSeries && mhmData.timeSeries.length > 0;
   const hasRefData = refData?.data && refData.data.length > 0;
@@ -265,27 +265,26 @@ export function DepthChart({ site, data }) {
 
         {/* Data availability warnings */}
         {!hasMhmData && hasRefData && (
-          <div className="mt-2 px-3 py-1 bg-yellow-50 border border-red-200 rounded-md">
-            <p className="text-xs text-red-800 text-center">
+          <div className="mt-2 px-3 py-1 bg-blue-50 border border-blue-200 rounded-md">
+            <p className="text-xs text-blue-800 text-center">
               ⚠️ MHM sensor data not available for selected time range. Showing
               reference data only.
             </p>
           </div>
         )}
         {hasMhmData && !hasRefData && (
-          <div className="mt-2 px-3 py-1 bg-blue-50 border border-blue-200 rounded-md">
-            <p className="text-xs text-blue-800 text-center">
-              ⚠️ Reference sensor data not available (
-              {refData?.error || 'No data'}). Showing MHM data only.
+          <div className="mt-2 px-3 py-1 bg-red-50 border border-red-200 rounded-md">
+            <p className="text-xs text-red-800 text-center">
+              ⚠️ Reference sensor data not available for selected time range.
+              Showing MHM data only.
             </p>
           </div>
         )}
-
         {/* Rainfall status */}
         {!hasRainfallData && (
           <div className="mt-2 px-3 py-1 bg-green-50 border border-green-200 rounded-md">
             <p className="text-xs text-green-800 text-center">
-              ⚠️ No Rainfall data available
+              ⚠️ No Rainfall data available for selected time range.
             </p>
           </div>
         )}
