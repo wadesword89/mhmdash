@@ -150,9 +150,9 @@ def fetchMHMLevelData(
 
 # ---- Example usage ----
 result = fetchMHMLevelData(
-    device_id=976,
-    start_time="2025-05-28T00:00:00Z",
-    end_time="2025-05-28T23:59:59Z",
+    device_id=951,
+    start_time="2025-09-15T00:00:00Z",
+    end_time="2025-09-16T23:59:59Z",
 )
 
 # Print compact JSON for Next.js frontend

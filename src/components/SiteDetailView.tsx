@@ -18,6 +18,7 @@ import { format } from 'date-fns';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import { DepthChart } from './DepthChart';
+import { DateRangePicker } from './DateRangePicker';
 
 dayjs.extend(utc); //add UTC (Coordinated Universal Time) support to parse, manipulate, and display dates in UTC format
 
@@ -25,6 +26,7 @@ export const SiteDetailView = ({ site, onClose }) => {
   // State to hold MHM data
   const [mhmData, setMhmData] = useState(null);
   const [refData, setRefData] = useState(null);
+  const [rainData, setRainData] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const base =
@@ -80,7 +82,6 @@ export const SiteDetailView = ({ site, onClose }) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           site,
-
           startTime,
           endTime,
         }),
@@ -92,6 +93,7 @@ export const SiteDetailView = ({ site, onClose }) => {
 
       setMhmData(data.mhm);
       setRefData(data.ref);
+      setRainData(data.rain);
     } catch (e) {
       console.error('site_data error:', e);
     } finally {
@@ -134,7 +136,9 @@ export const SiteDetailView = ({ site, onClose }) => {
               <CardTitle className="">Time Range</CardTitle>
             </CardHeader>
             <CardContent>
+              <DateRangePicker />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
                 {/* Start Date Picker */}
                 <div className="space-y-2">
                   <Label htmlFor="start-date">Start Date</Label>
@@ -196,6 +200,7 @@ export const SiteDetailView = ({ site, onClose }) => {
                     </PopoverContent>
                   </Popover>
                 </div>
+
               </div>
             </CardContent>
           </Card>
@@ -214,7 +219,7 @@ export const SiteDetailView = ({ site, onClose }) => {
                   </span>
                 </div>
               ) : mhmData || refData ? (
-                <DepthChart site={site} data={{ mhmData, refData }} />
+                <DepthChart site={site} data={{ mhmData, refData, rainData }} />
               ) : (
                 <div className="text-center py-8 text-gray-500">
                   Data Could Not Be Loaded
@@ -222,8 +227,6 @@ export const SiteDetailView = ({ site, onClose }) => {
               )}
             </CardContent>
           </Card>
-
-          
         </div>
       </div>
     </div>

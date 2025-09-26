@@ -1,6 +1,15 @@
 'use client';
 import { useMemo } from 'react';
-import { Line, LineChart, XAxis, YAxis, CartesianGrid, Legend } from 'recharts';
+import {
+  Line,
+  LineChart,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Legend,
+  Bar,
+  ComposedChart,
+} from 'recharts';
 import {
   ChartContainer,
   ChartTooltip,
@@ -10,10 +19,13 @@ import {
 export function DepthChart({ site, data }) {
   const mhmData = data?.mhmData;
   const refData = data?.refData;
-  console.log('DepthChart data:', data);
+  const rainfallData = data?.rainData;
+  console.log('Rainfall data:', rainfallData);
 
   const hasMhmData = mhmData?.timeSeries && mhmData.timeSeries.length > 0;
   const hasRefData = refData?.data && refData.data.length > 0;
+  const hasRainfallData =
+    Array.isArray(rainfallData?.data) && rainfallData.data.length > 0;
 
   // Early return if no data available at all
   if (!hasRefData && !hasMhmData) {
@@ -29,49 +41,102 @@ export function DepthChart({ site, data }) {
     );
   }
 
-  // Process and merge the datasets
+  // Process and merge the datasets including rainfall
   const processedData = useMemo(() => {
     if (!hasRefData && !hasMhmData) return [];
 
+    // Process rainfall data first
+    let processedRainfall: {
+      timestamp: number;
+      datetime: Date;
+      rainfall: number;
+    }[] = [];
+    if (hasRainfallData) {
+      processedRainfall = rainfallData.data.map((item) => {
+        const ts = new Date(item.t).getTime();
+        return {
+          timestamp: ts,
+          datetime: new Date(ts),
+          rainfall: Number(item.rainIn) || 0,
+        };
+      });
+    }
+
     // Case 1: Only reference data available
     if (!hasMhmData && hasRefData) {
-      return refData.data.map((item) => ({
-        timestamp: new Date(item.dateTime).getTime(),
-        datetime: new Date(item.dateTime).toLocaleString(),
-        shortDateTime: (() => {
-          const date = new Date(item.dateTime);
-          return `${date.getMonth() + 1}/${date.getDate()} ${date
+      return refData.data.map((item) => {
+        const timestamp = new Date(item.dateTime).getTime();
+        const date = new Date(item.dateTime);
+
+        // Find closest rainfall data point
+        let closestRainfall = null;
+        if (processedRainfall.length > 0) {
+          const closest = processedRainfall.reduce((prev, curr) =>
+            Math.abs(curr.timestamp - timestamp) <
+            Math.abs(prev.timestamp - timestamp)
+              ? curr
+              : prev
+          );
+          if (Math.abs(closest.timestamp - timestamp) < 30 * 60 * 1000) {
+            // Within 30 minutes
+            closestRainfall = closest.rainfall;
+          }
+        }
+
+        return {
+          timestamp: timestamp,
+          datetime: date.toLocaleString(),
+          shortDateTime: `${date.getMonth() + 1}/${date.getDate()} ${date
             .getHours()
             .toString()
             .padStart(2, '0')}:${date
             .getMinutes()
             .toString()
-            .padStart(2, '0')}`;
-        })(),
-        mhmLevel: null,
-        refLevel: item.reading,
-        quality: item.quality,
-      }));
+            .padStart(2, '0')}`,
+          mhmLevel: null,
+          refLevel: item.reading,
+          rainfall: closestRainfall || 0,
+          quality: item.quality,
+        };
+      });
     }
 
     // Case 2: Only MHM data available
     if (hasMhmData && !hasRefData) {
-      return mhmData.timeSeries.map((item) => ({
-        timestamp: item.t * 1000,
-        datetime: new Date(item.t * 1000).toLocaleString(),
-        shortDateTime: (() => {
-          const date = new Date(item.t * 1000);
-          return `${date.getMonth() + 1}/${date.getDate()} ${date
+      return mhmData.timeSeries.map((item) => {
+        const timestamp = item.t * 1000;
+        const date = new Date(timestamp);
+
+        // Find closest rainfall data point
+        let closestRainfall = null;
+        if (processedRainfall.length > 0) {
+          const closest = processedRainfall.reduce((prev, curr) =>
+            Math.abs(curr.timestamp - timestamp) <
+            Math.abs(prev.timestamp - timestamp)
+              ? curr
+              : prev
+          );
+          if (Math.abs(closest.timestamp - timestamp) < 30 * 60 * 1000) {
+            // Within 30 minutes
+            closestRainfall = closest.rainfall;
+          }
+        }
+
+        return {
+          timestamp: timestamp,
+          datetime: date.toLocaleString(),
+          shortDateTime: `${date.getMonth() + 1}/${date.getDate()} ${date
             .getHours()
             .toString()
             .padStart(2, '0')}:${date
             .getMinutes()
             .toString()
-            .padStart(2, '0')}`;
-        })(),
-        mhmLevel: item.levelIn,
-        refLevel: null,
-      }));
+            .padStart(2, '0')}`,
+          mhmLevel: item.levelIn,
+          refLevel: null,
+          rainfall: closestRainfall || 0,
+        };
+      });
     }
 
     // Case 3: Both datasets available - merge them
@@ -115,6 +180,7 @@ export function DepthChart({ site, data }) {
           .padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`,
         mhmLevel: null,
         refLevel: null,
+        rainfall: 0,
       };
 
       // Find closest MHM reading
@@ -139,13 +205,39 @@ export function DepthChart({ site, data }) {
         point.refLevel = closestRef.refLevel;
       }
 
+      // Find closest rainfall reading
+      if (processedRainfall.length > 0) {
+        const closestRain = processedRainfall.reduce((prev, curr) =>
+          Math.abs(curr.timestamp - time) < Math.abs(prev.timestamp - time)
+            ? curr
+            : prev
+        );
+        if (Math.abs(closestRain.timestamp - time) < 30 * 60 * 1000) {
+          // Within 30 minutes
+          point.rainfall = closestRain.rainfall;
+        }
+      }
+
       combined.push(point);
     }
 
     return combined.filter(
-      (point) => point.mhmLevel !== null || point.refLevel !== null
+      (p) => p.mhmLevel !== null || p.refLevel !== null || (p.rainfall ?? 0) > 0
     );
-  }, [mhmData, refData, hasMhmData, hasRefData]);
+  }, [mhmData, refData, rainfallData, hasMhmData, hasRefData, hasRainfallData]);
+
+  // Calculate rainfall statistics
+  const rainfallStats = useMemo(() => {
+    if (!hasRainfallData) return { total: 0, max: 0, nonZeroEvents: 0 };
+    const readings = rainfallData.data.map(
+      (d: { rainIn: number }) => Number(d.rainIn) || 0
+    );
+    return {
+      total: readings.reduce((s, v) => s + v, 0),
+      max: Math.max(...readings),
+      nonZeroEvents: readings.filter((v) => v > 0).length,
+    };
+  }, [hasRainfallData, rainfallData]);
 
   const chartConfig = {
     mhmLevel: {
@@ -156,6 +248,10 @@ export function DepthChart({ site, data }) {
       label: `${site.ref_source} ${site.ref_id}`,
       color: '#dc2626', // Red
     },
+    rainfall: {
+      label: 'Rainfall',
+      color: '#059669', // Green
+    },
   };
 
   return (
@@ -163,8 +259,11 @@ export function DepthChart({ site, data }) {
       <div className="mb-4">
         <h3 className="font-semibold">MH ID: {site.mh_id}</h3>
         <p className="text-sm text-muted-foreground">
-          MHM Device: {site.mhm_id} vs {site.ref_source} Reference: {site.ref_id}
+          MHM Device: {site.mhm_id} vs {site.ref_source} Reference:{' '}
+          {site.ref_id}
         </p>
+
+        {/* Data availability warnings */}
         {!hasMhmData && hasRefData && (
           <div className="mt-2 px-3 py-1 bg-yellow-50 border border-red-200 rounded-md">
             <p className="text-xs text-red-800 text-center">
@@ -181,10 +280,18 @@ export function DepthChart({ site, data }) {
             </p>
           </div>
         )}
-      </div>
 
+        {/* Rainfall status */}
+        {!hasRainfallData && (
+          <div className="mt-2 px-3 py-1 bg-green-50 border border-green-200 rounded-md">
+            <p className="text-xs text-green-800 text-center">
+              ⚠️ No Rainfall data available
+            </p>
+          </div>
+        )}
+      </div>
       <ChartContainer config={chartConfig} className="h-[450px] w-full">
-        <LineChart data={processedData}>
+        <ComposedChart data={processedData}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis
             dataKey="shortDateTime"
@@ -195,15 +302,58 @@ export function DepthChart({ site, data }) {
             interval="preserveStartEnd"
           />
           <YAxis
+            yAxisId="left"
             tick={{ fontSize: 12 }}
-            label={{ value: 'Level (in.)', angle: -90, position: 'insideLeft' }}
+            label={{
+              value: 'Water Level (in.)',
+              angle: -90,
+              position: 'insideLeft',
+            }}
+          />
+          <YAxis
+            yAxisId="right"
+            orientation="right"
+            tick={{ fontSize: 12 }}
+            label={{
+              value: 'Rainfall (in.)',
+              angle: 90,
+              position: 'insideRight',
+            }}
+            domain={[0, (dataMax: number) => Math.max(dataMax || 0, 0.05)]}
           />
           <ChartTooltip
             content={<ChartTooltipContent />}
-            labelFormatter={(value) => `Time: ${value}`}
+            labelFormatter={(v, payload) => {
+              // If you want the full timestamp instead of the short label:
+              const p0 = Array.isArray(payload) ? payload[0] : undefined;
+              const dt = p0?.payload?.datetime ?? v;
+              return `Time: ${dt}`;
+            }}
+            formatter={(value, _name, item) => {
+              const key = item?.dataKey; // <- reliable: 'mhmLevel' | 'refLevel' | 'rainfall'
+              if (key === 'rainfall') {
+                return [`${Number(value ?? 0).toFixed(3)}" `, 'Rainfall'];
+              }
+              if (key === 'mhmLevel') {
+                return [
+                  `${Number(value ?? 0).toFixed(2)}" `,
+                  chartConfig.mhmLevel.label,
+                ];
+              }
+              if (key === 'refLevel') {
+                return [
+                  `${Number(value ?? 0).toFixed(2)}" `,
+                  chartConfig.refLevel.label,
+                ];
+              }
+              return [String(value ?? ''), String(_name ?? '')];
+            }}
           />
           <Legend />
+
+          {/* Water level lines */}
           <Line
+            yAxisId="left"
             type="monotone"
             dataKey="mhmLevel"
             stroke={chartConfig.mhmLevel.color}
@@ -213,6 +363,7 @@ export function DepthChart({ site, data }) {
             connectNulls={false}
           />
           <Line
+            yAxisId="left"
             type="monotone"
             dataKey="refLevel"
             stroke={chartConfig.refLevel.color}
@@ -221,10 +372,20 @@ export function DepthChart({ site, data }) {
             name={chartConfig.refLevel.label}
             connectNulls={false}
           />
-        </LineChart>
+
+          {/* Rainfall bars */}
+          <Bar
+            yAxisId="right"
+            dataKey="rainfall"
+            fill={chartConfig.rainfall.color}
+            fillOpacity={0.6}
+            name={chartConfig.rainfall.label}
+            barSize={5}
+          />
+        </ComposedChart>
       </ChartContainer>
 
-      <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
+      <div className="mt-4 grid grid-cols-3 gap-4 text-sm">
         <div className="space-y-1">
           <div className="font-medium">MHM Device: {site.mhm_id}</div>
           {hasMhmData ? (
@@ -247,6 +408,7 @@ export function DepthChart({ site, data }) {
             </div>
           )}
         </div>
+
         <div className="space-y-1">
           <div className="font-medium">
             {site.ref_source}: {site.ref_id}
@@ -263,6 +425,30 @@ export function DepthChart({ site, data }) {
           ) : (
             <div className="text-muted-foreground text-xs">
               {refData?.error || 'No data available'}
+            </div>
+          )}
+        </div>
+
+        <div className="space-y-1">
+          <div className="font-medium">Rainfall Data</div>
+          {hasRainfallData ? (
+            <>
+              <div className="text-muted-foreground">
+                Total: {rainfallStats.total.toFixed(3)}"
+              </div>
+              <div className="text-muted-foreground">
+                Max: {rainfallStats.max.toFixed(3)}"
+              </div>
+              <div className="text-muted-foreground">
+                Events: {rainfallStats.nonZeroEvents}
+              </div>
+              <div className="text-muted-foreground">
+                Data Points: {rainfallData.data.length}
+              </div>
+            </>
+          ) : (
+            <div className="text-muted-foreground text-xs">
+              No rainfall data
             </div>
           )}
         </div>

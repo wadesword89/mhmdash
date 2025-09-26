@@ -113,7 +113,7 @@ def requestPrismRainData(startTime: str, endTime: str):
     return data
 
 
-# start = '2025-03-01T00:00:00'
-# end = '2025-03-01T23:59:59'
-# result = requestPrismRainData(start, end)
+start = '2024-12-23T00:00:00'
+end = '2024-12-24T23:59:59'
+result = requestPrismRainData(start, end)
 # print(result)

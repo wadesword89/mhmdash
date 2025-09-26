@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from api.data_sources.prism_api import requestPrismDepthData
+from api.data_sources.prism_api import requestPrismDepthData, requestPrismRainData
 from api.data_sources.mhm_api import fetchMHMLevelData
 from datetime import datetime
 
@@ -136,6 +136,31 @@ async def site_data(req: Request):
             "error": "EBMUD source not implemented",
         }
 
+        # --- Rain (always; RG11) ---
+    rain = {"source": "PRISM", "data": [], "cumulativeIn": None}
+    try:
+        rain_raw = requestPrismRainData(startTime, endTime)  # Gets RG11 data
+
+        entity = (
+            rain_raw[0]["entityData"][0]
+            if rain_raw and rain_raw[0].get("entityData")
+            else {}
+        )
+        data_points = entity.get("data", [])
+        series = [
+            {"t": p["dateTime"], "rainIn": p.get("reading")}
+            for p in data_points
+            if p.get("reading") is not None
+        ]
+        # Cumulative rainfall
+        cumulative = round(
+            sum(p.get("reading") or 0 for p in data_points),
+            2,
+        )
+        rain = {"source": "PRISM", "data": series, "cumulativeIn": cumulative}
+    except Exception as e:
+        rain = {"source": "PRISM", "data": [], "error": str(e)}
+
     return {
         "site": {
             "site_id": site.get("id"),
@@ -149,4 +174,5 @@ async def site_data(req: Request):
         "timeframe": {"start": startTime, "end": endTime},
         "mhm": mhm,
         "ref": reference,
+        "rain": rain,
     }
