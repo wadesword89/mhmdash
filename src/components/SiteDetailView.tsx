@@ -18,7 +18,6 @@ import { format } from 'date-fns';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import { DepthChart } from './DepthChart';
-import { DateRangePicker } from './DateRangePicker';
 
 dayjs.extend(utc); //add UTC (Coordinated Universal Time) support to parse, manipulate, and display dates in UTC format
 
@@ -39,8 +38,8 @@ export const SiteDetailView = ({ site, onClose }) => {
   const [startDate, setStartDate] = useState(() => {
     const savedDate = sessionStorage.getItem('startDate');
     return savedDate
-      ? new Date(savedDate) // create js Date Object
-      : dayjs().subtract(1, 'day').toDate(); //if not date in session storage, use yesterday as startDate
+      ? new Date(savedDate) 
+      : dayjs().subtract(1, 'day').toDate();
   });
   const [endDate, setEndDate] = useState(() => {
     const savedDate = sessionStorage.getItem('endDate');
@@ -130,7 +129,6 @@ export const SiteDetailView = ({ site, onClose }) => {
       {/* Content */}
       <div className="flex-1 overflow-auto p-6">
         <div className="space-y-6">
-          
           {/* Date Time Pickers */}
           <Card>
             <CardHeader>

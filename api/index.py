@@ -128,7 +128,6 @@ async def site_data(req: Request):
             reference = {"source": "ADS", "meta": {}, "timeSeries": [], "error": str(e)}
 
     elif ref_source == "EBMUD":
-        # Stub until you wire it up
         reference = {
             "source": "EBMUD",
             "meta": {},
@@ -136,7 +135,7 @@ async def site_data(req: Request):
             "error": "EBMUD source not implemented",
         }
 
-        # --- Rain (always; RG11) ---
+    # --- Rain (always; RG11) ---
     rain = {"source": "PRISM", "data": [], "cumulativeIn": None}
     try:
         rain_raw = requestPrismRainData(startTime, endTime)  # Gets RG11 data
