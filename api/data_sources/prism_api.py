@@ -107,7 +107,7 @@ def requestPrismRainData(startTime: str, endTime: str):
         "FY2425": {apiKey:"9vRkqNrr9PmloH8pEGcwj70e8OXsoZ/Nhd+EC8zzp9o=", locationId:22, entityId:2123},
         "FY2526": {apiKey:"O3qOFjGDSrjgLMO6ZiXFRXs/6sjWkZd5VUjZ/5/kHx0=", locationId:18, entityId:2123},
     }
-    
+
     headers = {
         "accept": "text/plain",
         "x-ads-dev": apiKey,  # API key depends on date range
@@ -121,7 +121,7 @@ def requestPrismRainData(startTime: str, endTime: str):
     return data
 
 
-start = '2025-10-13T00:00:00'
-end = '2025-10-16T23:59:59'
-result = requestPrismRainData(start, end)
-print(result)
+# start = '2025-10-13T00:00:00'
+# end = '2025-10-16T23:59:59'
+# result = requestPrismRainData(start, end)
+# print(result)
