@@ -8,11 +8,11 @@ import os
 
 # PI Configuration
 PI_CONFIG = {
-    'host': 'r-wwlabdev.win.ebmud',
-    'port': '18000',
-    'service': 'WWLABDEV',
-    'user': 'LIMSHIST',
-    'password': 'sushi'
+    'host': os.getenv("NEXT_PUBLIC_PI_HOST"),
+    'port': os.getenv("NEXT_PUBLIC_PI_PORT"),
+    'service': os.getenv("NEXT_PUBLIC_PI_SERVICE"),
+    'user': os.getenv("NEXT_PUBLIC_PI_USER"),
+    'password': os.getenv("NEXT_PUBLIC_PI_PASSWORD")
 }
 
 TAGS_TO_MONITOR = [
