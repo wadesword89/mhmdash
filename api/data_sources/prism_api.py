@@ -4,6 +4,7 @@ import os
 
 load_dotenv()
 
+PRISM_API_TOKEN = os.getenv("NEXT_PUBLIC_PRISM_API_TOKEN")
 
 def requestPrismDepthData(startTime: str, endTime: str, locationId: int):
     """
@@ -19,7 +20,6 @@ def requestPrismDepthData(startTime: str, endTime: str, locationId: int):
 
     startArr = startTime.split(":")
     endArr = endTime.split(":")
-    PRISM_API_TOKEN = os.getenv("NEXT_PUBLIC_PRISM_API_TOKEN")
 
     headers = {
         "accept": "text/plain",
@@ -62,7 +62,7 @@ def requestPrismTempData(startTime: str, endTime: str):
 
     headers = {
         "accept": "text/plain",
-        "x-ads-dev": "pN64fDCNXfEWHgj8+KPRp7QPoJIPM2ONcOjPo92EoQI=",  # API key for FY2425 data
+        "x-ads-dev": PRISM_API_TOKEN,
     }
 
     entityId = 4405  # Use 4122 to get DEPTH, or 4405 to get WATERTEMP_1
@@ -97,16 +97,13 @@ def requestPrismRainData(startTime: str, endTime: str):
 
     startArr = startTime.split(":")
     endArr = endTime.split(":")
+    
     entityId = 2123  # RAIN
     locationId = 18  # RG11
-    # apiKey = "9vRkqNrr9PmloH8pEGcwj70e8OXsoZ/Nhd+EC8zzp9o=" #FY2425 API key
-    apiKey = "O3qOFjGDSrjgLMO6ZiXFRXs/6sjWkZd5VUjZ/5/kHx0=" #FY2526 API key
 
-    # Map fiscal years to their respective API keys
-    PRISM_API_KEYS = {
-        "FY2425": {apiKey:"9vRkqNrr9PmloH8pEGcwj70e8OXsoZ/Nhd+EC8zzp9o=", locationId:22, entityId:2123},
-        "FY2526": {apiKey:"O3qOFjGDSrjgLMO6ZiXFRXs/6sjWkZd5VUjZ/5/kHx0=", locationId:18, entityId:2123},
-    }
+    PRISM_RG_API_TOKEN = os.getenv("NEXT_PUBLIC_PRISM_RG_API_TOKEN")
+    apiKey = PRISM_RG_API_TOKEN
+
 
     headers = {
         "accept": "text/plain",
