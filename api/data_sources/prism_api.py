@@ -97,9 +97,9 @@ def requestPrismRainData(startTime: str, endTime: str):
 
     startArr = startTime.split(":")
     endArr = endTime.split(":")
-    
-    entityId = 2123  # RAIN
-    locationId = 18  # RG11
+
+    entityId = 2123  # RAIN (Verify for FY)
+    locationId = 18  # RG11 (Verify for FY)
 
     PRISM_RG_API_TOKEN = os.getenv("NEXT_PUBLIC_PRISM_RG_API_TOKEN")
     apiKey = PRISM_RG_API_TOKEN
