@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from api.data_sources.prism_api import requestPrismDepthData, requestPrismRainData
 from api.data_sources.mhm_api import fetchMHMLevelData
+from api.data_sources.pi_data import pullPiData
 from datetime import datetime
 
 app = FastAPI(docs_url="/api/py/docs", openapi_url="/api/py/openapi.json")
@@ -128,12 +129,16 @@ async def site_data(req: Request):
             reference = {"source": "ADS", "meta": {}, "timeSeries": [], "error": str(e)}
 
     elif ref_source == "EBMUD":
-        reference = {
-            "source": "EBMUD",
-            "meta": {},
-            "timeSeries": [],
-            "error": "EBMUD source not implemented",
-        }
+        try:
+            ebmud_raw = pullPiData(startTime, endTime, [site.get("ref_id")])
+            reference =ebmud_raw
+        except Exception as e:
+            reference = {
+                "source": "EBMUD",
+                "meta": {},
+                "timeSeries": [],
+                "error": "EBMUD source not implemented",
+            }
 
     # --- Rain (always; RG11) ---
     rain = {"source": "PRISM", "data": [], "cumulativeIn": None}
