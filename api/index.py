@@ -117,28 +117,23 @@ async def site_data(req: Request):
 
     # --- Reference (branch ADS/EBMUD/None) ---
     ref_source = site.get("ref_source")
-    reference = {"source": None, "meta": {}, "timeSeries": []}
+    reference = {"source": None, "meta": {}, "data": []}
 
     if ref_source == "ADS":
         try:
             prism_raw = requestPrismDepthData(startTime, endTime, site.get("ref_locId"))
-
             reference = prism_raw[0]["entityData"][0]
 
         except Exception as e:
-            reference = {"source": "ADS", "meta": {}, "timeSeries": [], "error": str(e)}
+            reference = {"source": "ADS", "meta": {}, "data": [], "error": str(e)}
 
     elif ref_source == "EBMUD":
         try:
-            ebmud_raw = pullPiData(startTime, endTime, [site.get("ref_id")])
+            ebmud_raw = pullPiData(startTime, endTime, site.get("tag"))
             reference =ebmud_raw
+
         except Exception as e:
-            reference = {
-                "source": "EBMUD",
-                "meta": {},
-                "timeSeries": [],
-                "error": "EBMUD source not implemented",
-            }
+            reference = {"source": "EBMUD","meta": {},"data": [],"error": "EBMUD source not implemented",}
 
     # --- Rain (always; RG11) ---
     rain = {"source": "PRISM", "data": [], "cumulativeIn": None}

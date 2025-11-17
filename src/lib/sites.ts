@@ -33,6 +33,7 @@ export const sites = [
     mhm_id: 959,
     ref_id: 'Oakland Estuary Upstream',
     ref_source: 'EBMUD',
+    tag: 'OAK_EST_UP_LVL',
     coordinates: [37.79299926, -122.275001],
   },
   {
@@ -41,6 +42,7 @@ export const sites = [
     mhm_id: 963,
     ref_id: 'Oakland Estuary Downstream',
     ref_source: 'EBMUD',
+    tag: 'OAK_EST_DN_LVL',
     coordinates: [37.79199981, -122.273002],
   },
 ];

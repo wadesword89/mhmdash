@@ -415,7 +415,7 @@ export function DepthChart({ site, data }) {
           {hasRefData ? (
             <>
               <div className="text-muted-foreground">
-                Location ID: {site.ref_locId}
+                Location ID: {site.ref_locId? site.ref_locId : 'N/A'}
               </div>
               <div className="text-muted-foreground">
                 Data Points: {refData.data?.length || 0}

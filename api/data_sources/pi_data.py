@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from typing import List, Dict
 import os
 
-#Initialize thicke mode
+#Initialize thick mode
 try:
     oracle_client_lib = os.getenv("ORACLE_CLIENT_LIB")
     if oracle_client_lib:
@@ -18,35 +18,36 @@ except Exception as e:
 
 # PI Configuration
 PI_CONFIG = {
-    'host': os.getenv("NEXT_PUBLIC_PI_HOST"),
-    'port': os.getenv("NEXT_PUBLIC_PI_PORT"),
-    'service': os.getenv("NEXT_PUBLIC_PI_SERVICE"),
-    'user': os.getenv("NEXT_PUBLIC_PI_USER"),
-    'password': os.getenv("NEXT_PUBLIC_PI_PASSWORD")
+    'host': os.getenv("PI_HOST"),
+    'port': os.getenv("PI_PORT"),
+    'service': os.getenv("PI_SERVICE"),
+    'user': os.getenv("PI_USER"),
+    'password': os.getenv("PI_PASSWORD")
 }
 
-TAGS_TO_MONITOR = [
-    'OAK_EST_UP_LVL',
-    'OAK_EST_DN_LEVEL'
-]
 
-def pullPiData(startDate: str, endDate: str) -> List[Dict]:
+def pullPiData(startDate: str, endDate: str, tag:str) -> List[Dict]:
     """
-    Pull PI historian data for multiple tags within a date range.
+    Pull PI historian data for a specific tag within a date range.
     
     Parameters:
     -----------
     startDate : str
-        Start date in format 'YYYY-MM-DD' or 'YYYY-MM-DD HH:MM'
+        Start date in format 'YYYY-MM-DD' or 'YYYY-MM-DD HH:MM:SS'
     endDate : str
-        End date in format 'YYYY-MM-DD' or 'YYYY-MM-DD HH:MM'
-    tags : list of str
-        List of PI tag names (e.g., ['OAK_EST_UP_LVL', 'OAK_EST_DN_LEVEL'])
+        End date in format 'YYYY-MM-DD' or 'YYYY-MM-DD HH:MM:SS'
+    tag : str
+        PI tag name to get data (e.g., 'OAK_EST_UP_LVL' or 'OAK_EST_DN_LVL')
     
     Returns:
     --------
-    list of dict
-        List of flat records: [{timestamp, tag, value}, ...]
+    dict
+        Dictionary with structure format:
+        {
+            "source": "EBMUD",
+            "meta": {"tag": tag},
+            "timeSeries": [{"t": timestamp, "value": value},...]
+        }
     """
     
     try:
@@ -63,18 +64,19 @@ def pullPiData(startDate: str, endDate: str) -> List[Dict]:
         )
         
         # Format dates for SQL
-        date_start = f"'{startDate}'"
-        date_end = f"'{endDate}'"
+        date_start_clean = startDate.replace('T', ' ')
+        date_end_clean = endDate.replace('T', ' ')
+        date_start = f"'{date_start_clean}'"
+        date_end = f"'{date_end_clean}'"
         
-        # Create tag string for SQL (handles multiple tags)
-        tag_strings = [f"CAST('{tag}' as nvarchar2(40))" for tag in TAGS_TO_MONITOR]
-        tag_string = ', '.join(tag_strings)
-        
+        # Use the specific tag parameter
+        tag_string = f"CAST('{tag}' as nvarchar2(40))"
+
         # Query for 15-minute interpolated data
         sql_interp = f"""SELECT * FROM piinterp@piprd b 
-        WHERE (b.\"tag\" IN ({tag_string})) 
-        AND (b.\"time\" >= TO_DATE({date_start}, 'YYYY-MM-DD'))
-        AND (b.\"time\" <= TO_DATE({date_end}, 'YYYY-MM-DD hh24:mi'))
+        WHERE (b.\"tag\" = {tag_string}) 
+        AND (b.\"time\" >= TO_DATE({date_start}, 'YYYY-MM-DD HH24:MI:SS'))
+        AND (b.\"time\" <= TO_DATE({date_end}, 'YYYY-MM-DD HH24:MI:SS'))
         AND b.\"timestep\" = '15m'"""
         
         # Execute query
@@ -85,64 +87,42 @@ def pullPiData(startDate: str, endDate: str) -> List[Dict]:
         
         # Process dataframe
         if df.empty:
-            print(f"No data returned for tags {TAGS_TO_MONITOR}")
-            return []
+            print(f"No data returned for tag {tag}")
+            return {"source": "EBMUD", "meta": {"tag": tag}, "data": []}
         
         # Select relevant columns and sort by time
-        df = df[['tag', 'time', 'value']].sort_values(['tag', 'time'])
+        df = df[['tag', 'time', 'value']].sort_values('time')
         
         # Remove duplicates (keep last)
-        df = df.drop_duplicates(subset=['tag', 'time'], keep='last')
+        df = df.drop_duplicates(subset='time', keep='last')
         
-        print(f"Successfully pulled {len(df)} records for {len(TAGS_TO_MONITOR)} tags")
+        print(f"Successfully pulled {len(df)} records for tag {tag}")
         
-        # Convert to list of dictionaries for database storage
-        result = []
+        # Convert to format for frontend
+        time_series = []
         for _, row in df.iterrows():
-            result.append({
-                'timestamp': row['time'],
-                'tag': row['tag'],
-                'value': float(row['value']) if pd.notna(row['value']) else None
-            })
-        
-        return result
-        
+            if pd.notna(row['value']):
+                time_series.append({
+                    "dateTime": row['time'].isoformat(),
+                    "reading": round(float(row['value']) * 12 , 2) #convert feet to inches
+                })
+        return {
+            "source": "EBMUD",
+            "meta": {"tag": tag},
+            "data": time_series
+        }
     except Exception as e:
-        print(f"Error pulling data for tags {TAGS_TO_MONITOR}: {str(e)}")
-        return []
+        print(f"Error pulling data for tag {tag}: {str(e)}")
+        return {
+            "source": "EBMUD",
+            "meta": {"tag": tag},
+            "data": [],
+            "error": str(e)
+        }
 
-data = pullPiData('2025-09-21', '2025-09-21')
-print('pulled Data', data)
+# data = pullPiData('2025-09-21', '2025-09-22', 'OAK_EST_DN_LVL')
+# print('PULLED API Data :', data)
 
 """
-DN_LEVEL?
-[
-{'timestamp': Timestamp('2025-09-21 00:00:00'), 'tag': 'OAK_EST_UP_LVL', 'value': 2.1880174}, 
-{'timestamp': Timestamp('2025-09-21 00:15:00'), 'tag': 'OAK_EST_UP_LVL', 'value': 2.1788547}, 
-{'timestamp': Timestamp('2025-09-21 00:30:00'), 'tag': 'OAK_EST_UP_LVL', 'value': 2.1696918}, 
-{'timestamp': Timestamp('2025-09-21 00:45:00'), 'tag': 'OAK_EST_UP_LVL', 'value': 2.1605289}, 
-{'timestamp': Timestamp('2025-09-21 01:00:00'), 'tag': 'OAK_EST_UP_LVL', 'value': 2.1513662}, 
-{'timestamp': Timestamp('2025-09-21 01:15:00'), 'tag': 'OAK_EST_UP_LVL', 'value': 2.1422033}, 
-{'timestamp': Timestamp('2025-09-21 01:30:00'), 'tag': 'OAK_EST_UP_LVL', 'value': 2.1330407}, 
-{'timestamp': Timestamp('2025-09-21 01:45:00'), 'tag': 'OAK_EST_UP_LVL', 'value': 2.1217463}, 
-{'timestamp': Timestamp('2025-09-21 02:00:00'), 'tag': 'OAK_EST_UP_LVL', 'value': 2.1094439}, 
-{'timestamp': Timestamp('2025-09-21 02:15:00'), 'tag': 'OAK_EST_UP_LVL', 'value': 2.0971415}, 
-{'timestamp': Timestamp('2025-09-21 02:30:00'), 'tag': 'OAK_EST_UP_LVL', 'value': 2.0848391}, 
-{'timestamp': Timestamp('2025-09-21 02:45:00'), 'tag': 'OAK_EST_UP_LVL', 'value': 2.0725367}, 
-{'timestamp': Timestamp('2025-09-21 03:00:00'), 'tag': 'OAK_EST_UP_LVL', 'value': 2.0602343}, 
-{'timestamp': Timestamp('2025-09-21 03:15:00'), 'tag': 'OAK_EST_UP_LVL', 'value': 2.0479319}, 
-{'timestamp': Timestamp('2025-09-21 03:30:00'), 'tag': 'OAK_EST_UP_LVL', 'value': 2.0356295}, 
-{'timestamp': Timestamp('2025-09-21 03:45:00'), 'tag': 'OAK_EST_UP_LVL', 'value': 2.0233271}, 
-{'timestamp': Timestamp('2025-09-21 04:00:00'), 'tag': 'OAK_EST_UP_LVL', 'value': 2.0110247}, 
-{'timestamp': Timestamp('2025-09-21 04:15:00'), 'tag': 'OAK_EST_UP_LVL', 'value': 1.9987223}, 
-{'timestamp': Timestamp('2025-09-21 04:30:00'), 'tag': 'OAK_EST_UP_LVL', 'value': 1.9864199}, 
-{'timestamp': Timestamp('2025-09-21 04:45:00'), 'tag': 'OAK_EST_UP_LVL', 'value': 1.9741175}, 
-{'timestamp': Timestamp('2025-09-21 05:00:00'), 'tag': 'OAK_EST_UP_LVL', 'value': 1.9618151}, 
-{'timestamp': Timestamp('2025-09-21 05:15:00'), 'tag': 'OAK_EST_UP_LVL', 'value': 1.9495127}, 
-{'timestamp': Timestamp('2025-09-21 05:30:00'), 'tag': 'OAK_EST_UP_LVL', 'value': 1.9372103}, 
-{'timestamp': Timestamp('2025-09-21 05:45:00'), 'tag': 'OAK_EST_UP_LVL', 'value': 1.9249079}, 
-{'timestamp': Timestamp('2025-09-21 06:00:00'), 'tag': 'OAK_EST_UP_LVL', 'value': 1.9126055},
-...,
-{'timestamp': Timestamp('2025-09-22 00:00:00'), 'tag': 'OAK_EST_UP_LVL', 'value': 2.3076696}
-]
+
 """

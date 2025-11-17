@@ -22,10 +22,10 @@ import { DepthChart } from './DepthChart';
 dayjs.extend(utc); //add UTC (Coordinated Universal Time) support to parse, manipulate, and display dates in UTC format
 
 export const SiteDetailView = ({ site, onClose }) => {
-  // State to hold MHM data
-  const [mhmData, setMhmData] = useState(null);
-  const [refData, setRefData] = useState(null);
-  const [rainData, setRainData] = useState(null);
+
+  const [mhmData, setMhmData] = useState(null); // MHM Data
+  const [refData, setRefData] = useState(null); // ADS or EBMUD data
+  const [rainData, setRainData] = useState(null); // RG11 data
   const [loading, setLoading] = useState(false);
 
   const base =
@@ -73,6 +73,7 @@ export const SiteDetailView = ({ site, onClose }) => {
     }
   };
 
+  // Function to Fetch MHM, Ref Data, and RG data from API's
   const fetchSiteData = async (site, startTime, endTime) => {
     setLoading(true);
     try {
@@ -99,7 +100,8 @@ export const SiteDetailView = ({ site, onClose }) => {
       setLoading(false);
     }
   };
-
+  
+  // Invoke fetch function when site or times change.
   useEffect(() => {
     fetchSiteData(site, startTime, endTime);
   }, [site, startTime, endTime]);
