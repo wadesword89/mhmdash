@@ -359,7 +359,7 @@ export function DepthChart({ site, data }) {
             strokeWidth={2}
             dot={false}
             name={chartConfig.mhmLevel.label}
-            connectNulls={false}
+            connectNulls={true}
           />
           <Line
             yAxisId="left"
@@ -369,7 +369,7 @@ export function DepthChart({ site, data }) {
             strokeWidth={2}
             dot={false}
             name={chartConfig.refLevel.label}
-            connectNulls={false}
+            connectNulls={true}
           />
 
           {/* Rainfall bars */}

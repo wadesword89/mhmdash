@@ -33,7 +33,7 @@ export const sites = [
     mhm_id: 959,
     ref_id: 'Oakland Estuary Upstream',
     ref_source: 'EBMUD',
-    tag: 'OAK_EST_UP_LVL',
+    tag: 'OAK_EST_UP_LVL', // Should match whats on EDS
     coordinates: [37.79299926, -122.275001],
   },
   {
@@ -44,5 +44,14 @@ export const sites = [
     ref_source: 'EBMUD',
     tag: 'OAK_EST_DN_LVL',
     coordinates: [37.79199981, -122.273002],
+  },
+  {
+    id: 6,
+    mh_id: 'ECU',
+    mhm_id: 957,
+    ref_id: 'Elmhurst Creek Upstream',
+    ref_source: 'EBMUD',
+    tag: 'R_ELM_UP',
+    coordinates: [37.75, -122.199996],
   },
 ];
