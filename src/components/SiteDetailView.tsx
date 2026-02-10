@@ -114,7 +114,7 @@ export const SiteDetailView = ({ site, onClose }) => {
           <div className="min-w-0 flex-1">
             <p className="text-sm text-gray-600 mt-4">MH ID:</p>
             <h2 className="text-xl font-semibold text-gray-900">
-              {site.mh_id}
+              {site.mh_id}: {site.ref_id}
             </h2>
           </div>
           <Button
